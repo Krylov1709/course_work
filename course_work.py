@@ -72,14 +72,17 @@ class Yandex:
             print(f'Создан альбом "{path}"')    
             return response
          
-    def load_file(self, path):
+    def load_file(self, path, n=5):
         '''Записываем файл в указанную папку на яндекс диске и создаем файл с информацией о сохраненных файлах'''
         self.create_folder(path)
         size = []
         file_name = []
         url = 'https://cloud-api.yandex.net/v1/disk/resources/upload'
         try:
-            for photo in tqdm(vk.photos_info()):
+            photos_list = vk.photos_info()
+            if n > len(photos_list):
+                print(f'Количество фотографий в альбоме всего {len(photos_list)}')
+            for photo in tqdm(photos_list[:n]):
                 url_photo = photo['url']
                 size.append(photo['size'])
                 if f'{photo["likes"]}.jpg' in file_name:
@@ -107,15 +110,17 @@ def copy_result(copy_result):
     except TypeError:
         print('Неверный формат данных для записи в файл')        
 
-ya_access_token = ''
-vk_access_token = ''
+ya_access_token = 'AQAAAABC68z1AADLW52UgVFZp0q1tGQ5Tdhzbe4'
+vk_access_token = 'vk1.a.k6OXiuC98rBRaGPTXcy5uNiTal6Hn54oJ2ubE16EdjWAYYYc3Hg1p5Aooy01L3yusWlK1BJPQkF9hvQtylUJawqELmVGnUwxbAcPi31oMolinK8ork6-1sRZkXAqyIaui_9aFOGwJwLPDbyN48T9RsFy_Y4GRXzHqV9YBvv_pyqP8oJhbBCivUB-tz76ULdR'
 user_id = input('Введите ID пользователя: ')
 vk = VK(vk_access_token, user_id)
 ya = Yandex(ya_access_token)
 name_album_yandex = input('Введите название альбома для сохранения: ')
-# pprint(vk.users_info())
-# pprint(vk.photos_info())
-# ya.create_folder(name_album_yandex)
-# ya.load_file(name_album_yandex)
-copy_result(ya.load_file(name_album_yandex))
-
+try:
+    n = int(input(f'Сколько скачать фотографий: '))
+except ValueError:
+    print(f'Введенны неверные данные. Будет скачено 5 фотографий')
+try:
+    copy_result(ya.load_file(name_album_yandex, n))
+except NameError:
+    copy_result(ya.load_file(name_album_yandex)) 
